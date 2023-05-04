@@ -14,25 +14,17 @@ on:
   workflow_dispatch:
 
 jobs:
-  linter:
-    strategy:
-      fail-fast: false
-      matrix:
-        python-version: [3.9]
-        os: [ubuntu-latest]
-    runs-on: ${{ matrix.os }}
+  lint:
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
+      - uses: psf/black@stable
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Install project
-        run: make install
-      - name: Run linter
-        run: make lint
-
+          auto_fix: true
   tests_linux:
-    needs: linter
+    needs: lint
     strategy:
       fail-fast: false
       matrix:
@@ -54,7 +46,7 @@ jobs:
         #   fail_ci_if_error: true
 
   tests_mac:
-    needs: linter
+    needs: lint
     strategy:
       fail-fast: false
       matrix:
@@ -72,7 +64,7 @@ jobs:
         run: make test
 
   tests_win:
-    needs: linter
+    needs: lint
     strategy:
       fail-fast: false
       matrix:
