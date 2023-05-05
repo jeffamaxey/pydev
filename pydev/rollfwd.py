@@ -68,11 +68,7 @@ if DEBUG:
     pd.set_option('display.max_rows', None)
     TEXT_NOTIFICATIONS = False
 
-if TO_SQL:
-    TO_CSV = True
-else:
-    TO_CSV = config["projection_params"]["to_csv"]
-
+TO_CSV = True if TO_SQL else config["projection_params"]["to_csv"]
 # Notification Credentials
 SENDER_NAME = config["notification_credentials"]["username"]
 SENDER_PASS = config["notification_credentials"]["app_password"]
@@ -287,30 +283,23 @@ def identify_overalloc(df, implicit_ind, illiquid_ind, date_tm_trad_legacy_bal, 
     aait_trad_overalloc = (
         (df["over_allocation"] == 1) & (df["is_aait_trad"] == 1)
     ).max()
-    
+
     # Gate 7
     if implicit_ind == 1 and x_case_trad_pct <= trad_target_pct:
         rebal_gate = GATE_NAMES["gate_7"]
-    # Gate 8
-    elif implicit_ind == 1 and x_case_trad_pct > trad_target_pct:
+    elif implicit_ind == 1:
         rebal_gate = GATE_NAMES["gate_8"]
-    # Gate 2
     elif legacy_bal_0 and not aait_trad_overalloc and not legacy_overalloc:
         rebal_gate = GATE_NAMES["gate_2"]
-    # Gate 5
     elif not legacy_bal_0 and not aait_trad_overalloc and not legacy_overalloc:
         rebal_gate = GATE_NAMES["gate_5"]
-    # Gate 1
     elif legacy_bal_0 and aait_trad_overalloc:
         rebal_gate = GATE_NAMES["gate_1"]
-    # Gate 3
     elif not legacy_bal_0 and aait_trad_overalloc and not legacy_overalloc:
         rebal_gate = GATE_NAMES["gate_3"]
-    # Gate 4
-    elif not aait_trad_overalloc and legacy_overalloc:
+    elif not aait_trad_overalloc:
         rebal_gate = GATE_NAMES["gate_4"]
-    # Gate 6
-    elif aait_trad_overalloc and legacy_overalloc:
+    else:
         rebal_gate = GATE_NAMES["gate_6"]
 
     return rebal_gate, df, trad_active_pct, trad_target_pct
